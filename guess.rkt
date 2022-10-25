@@ -72,9 +72,9 @@
   (stop-with new-value))
 
 (define (smaller w)
-  (struct-copy interval w (big (max (interval-small w) (sub1 (guess w))))
-                          (rounds-played (add1 (interval-rounds-played w)))))
+  (struct-copy interval w [big (max (interval-small w) (sub1 (guess w)))]
+                          [rounds-played (add1 (interval-rounds-played w))]))
 
 (define (bigger w)
-  (struct-copy interval w (small (min (interval-big w) (add1 (guess w))))
-                          (rounds-played (add1 (interval-rounds-played w)))))
+  (struct-copy interval w [small (min (interval-big w) (add1 (guess w)))]
+                          [rounds-played (add1 (interval-rounds-played w))]))
