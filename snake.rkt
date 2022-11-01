@@ -4,7 +4,7 @@
 
 
 (define SIZE 30)
-(define SEG-SIZE 15)
+(define SEG-SIZE 30)
 (define WIDTH-PX  (* SEG-SIZE SIZE))
 (define HEIGHT-PX (* SEG-SIZE SIZE))
 (define EXPIRATION-TIME 500)
@@ -81,8 +81,8 @@
              [(string=? dir "right") (posn-move head 1 0)])))
 
 (define (posn-move p dx dy)
-  (posn (+ (posn-x p) dx)
-        (+ (posn-y p) dy)))
+  (posn (modulo (+ (posn-x p) dx) SIZE)
+        (modulo (+ (posn-y p) dy) SIZE)))
 
 (define (fresh-goo)
   (goo (posn (add1 (random (sub1 SIZE)))
@@ -128,9 +128,7 @@
 
 (define (world-change-dir w d)
   (define the-snake (pit-snake w))
-  (cond [(and (opposite-dir? (snake-dir the-snake) d)
-              (cons? (rest (snake-segs the-snake))))
-         (stop-with w)]
+  (cond [(opposite-dir? (snake-dir the-snake) d) w]
         [else
          (pit (snake-change-dir the-snake d) (pit-goos w))]))
 
@@ -182,7 +180,8 @@
 
 (define (dead? w)
   (define snake (pit-snake w))
-  (or (self-colliding? snake) (wall-colliding? snake)))
+  (self-colliding? snake))
+ 
 
 (define (render-end w)
   (overlay (text "Game Over" ENDGAME-TEXT-SIZE "black")
@@ -204,3 +203,4 @@
 (define (snake-change-dir sn d)
   (snake d (snake-segs sn)))
 
+(start-snake)
