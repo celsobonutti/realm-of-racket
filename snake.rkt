@@ -8,7 +8,7 @@
 (define WIDTH-PX  (* SEG-SIZE SIZE))
 (define HEIGHT-PX (* SEG-SIZE SIZE))
 (define EXPIRATION-TIME 500)
-(define TICK-RATE 1/10)
+(define TICK-RATE 1/5)
 
 (define MT-SCENE
   (empty-scene WIDTH-PX HEIGHT-PX))
@@ -30,16 +30,14 @@
 
 (define (start-snake)
   (big-bang (pit (snake "right" (list (posn 1 1)))
-                 (list (fresh-goo)
-                       (fresh-goo)
-                       (fresh-goo)
-                       (fresh-goo)
-                       (fresh-goo)
-                       (fresh-goo)))
+                 (build-list 6 (curry const fresh-goo)))
             (on-tick next-pit TICK-RATE)
             (on-key direct-snake)
             (to-draw render-pit)
             (stop-when dead? render-end)))
+
+(define (const x y)
+  (x))
 
 (define (next-pit w)
   (let* ([snake (pit-snake w)]
@@ -50,10 +48,7 @@
         (pit (slither snake) (age-goo goos)))))
 
 (define (can-eat snake goos)
-  (cond [(null? goos) #f]
-        [else (if (close? (snake-head snake) (car goos))
-                  (car goos)
-                  (can-eat snake (cdr goos)))]))
+  (ormap (λ(g) (and (close? (snake-head snake) g) g)) goos))
 
 (define (close? s g)
   (posn=? s (goo-loc g)))
@@ -163,11 +158,7 @@
   (λ~>> snake-segs car))
 
 (define (img-list+scene posns img scene)
-  (cond [(null? posns) scene]
-        [else (img+scene
-               (car posns)
-               img
-               (img-list+scene (cdr posns) img scene))]))
+  (foldr (λ(p s) (img+scene p img s)) scene posns))
 
 (define (img+scene posn img scene)
   (place-image img
